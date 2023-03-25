@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Get Image URL</title>
+</head>
+<body>
+	<input type="text" id="folder-name" placeholder="Folder name">
+	<button onclick="getImageUrl()">Get Image URL</button>
+
+	<div id="image-container"></div>
+
+	<!-- Firebase SDK -->
+	<script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-database.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-storage.js"></script>
+
+	<script>
+	  // Your web app's Firebase configuration
+      const firebaseConfig = {
+			apiKey: "AIzaSyDwuvmxVJQ5dwjpth8gtwzbGRMy3tPp8zA",
+			authDomain: "sendimage-71a2a.firebaseapp.com",
+			databaseURL: "https://sendimage-71a2a-default-rtdb.asia-southeast1.firebasedatabase.app",
+			projectId: "sendimage-71a2a",
+			storageBucket: "sendimage-71a2a.appspot.com",
+			messagingSenderId: "189602561926",
+			appId: "1:189602561926:web:2a4d0b5c2f82da15343607",
+			measurementId: "G-35CLRJZ5R1"
+		};
+	  // Initialize Firebase
+	  firebase.initializeApp(firebaseConfig);
+
+	  function getImageUrl() {
+	    var folderName = document.getElementById("folder-name").value;
+	    var folderRef = firebase.database().ref(folderName + '/url');
+	    folderRef.on('value', function(snapshot) {
+	      var data = snapshot.val();
+	      var imageUrl = data.url;
+          console.log(imageUrl);
+	      var imageContainer = document.getElementById("image-container");
+	      var img = document.createElement("img");
+	      img.src = imageUrl;
+	      imageContainer.appendChild(img);
+	    });
+	  }
+	</script>
+</body>
+</html>
