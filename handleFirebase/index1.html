@@ -7,7 +7,9 @@
 	<input type="text" id="folder-name" placeholder="Folder name">
 	<button onclick="getImageUrl()">Get Image URL</button>
 
-	<div id="image-container"></div>
+	<div id="image-container">
+		<img id="showimg" alt="">
+	</div>
 
 	<!-- Firebase SDK -->
 	<script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
@@ -28,18 +30,17 @@
 		};
 	  // Initialize Firebase
 	  firebase.initializeApp(firebaseConfig);
-
+		var img = document.getElementById("showimg");
 	  function getImageUrl() {
 	    var folderName = document.getElementById("folder-name").value;
-	    var folderRef = firebase.database().ref(folderName + '/url');
+		var folderRef = firebase.database().ref(folderName +'/url');
 	    folderRef.on('value', function(snapshot) {
-	      var data = snapshot.val();
-	      var imageUrl = data.url;
-          console.log(imageUrl);
-	      var imageContainer = document.getElementById("image-container");
-	      var img = document.createElement("img");
-	      img.src = imageUrl;
-	      imageContainer.appendChild(img);
+	    imageUrl = snapshot.val();
+		console.log(imageUrl);
+	    var imageContainer = document.getElementById("image-container");
+	    //var img = document.createElement("img");
+		img.src = imageUrl;
+	    //imageContainer.appendChild(img);
 	    });
 	  }
 	</script>
