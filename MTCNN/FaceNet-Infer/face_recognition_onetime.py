@@ -64,8 +64,6 @@ def extract_face(box, img, margin=20):
     return face
 
 if __name__ == "__main__":
-    prev_frame_time = 0
-    new_frame_time = 0
     power = pow(10, 6)
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     print(device)
@@ -77,38 +75,44 @@ if __name__ == "__main__":
     model.eval()
 
     mtcnn = MTCNN(thresholds= [0.7, 0.7, 0.8] ,keep_all=True, device = device)
-
     cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH,640)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT,480)
     embeddings, names = load_faceslist()
-    while cap.isOpened():
-        isSuccess, frame = cap.read()
-        if isSuccess:
-            boxes, _ = mtcnn.detect(frame)
-            if boxes is not None:
-                for box in boxes:
-                    bbox = list(map(int,box.tolist()))
-                    face = extract_face(bbox, frame)
-                    idx, score = inference(model, face, embeddings)
-                    if idx != -1:
-                        frame = cv2.rectangle(frame, (bbox[0],bbox[1]), (bbox[2],bbox[3]), (0,0,255), 6)
-                        score = torch.Tensor.cpu(score[0]).detach().numpy()*power
-                        frame = cv2.putText(frame, names[idx] + '_{:.2f}'.format(score), (bbox[0],bbox[1]), cv2.FONT_HERSHEY_DUPLEX, 2, (0,255,0), 2, cv2.LINE_8)
-                    else:
-                        frame = cv2.rectangle(frame, (bbox[0],bbox[1]), (bbox[2],bbox[3]), (0,0,255), 6)
-                        frame = cv2.putText(frame,'Unknown', (bbox[0],bbox[1]), cv2.FONT_HERSHEY_DUPLEX, 2, (0,255,0), 2, cv2.LINE_8)
+    
+    ret, frame = cap.read()
+    if not ret:
+        print('Failed to capture image ')
+        cap.release()
+        cv2.destroyAllWindows()
+        exit()
 
-            new_frame_time = time.time()
-            fps = 1/(new_frame_time-prev_frame_time)
-            prev_frame_time = new_frame_time
-            fps = str(int(fps))
-            # cv2.putText(frame, fps, (7, 70), cv2.FONT_HERSHEY_DUPLEX, 3, (100, 255, 0), 3, cv2.LINE_AA)
-            cv2.putText(frame, fps, (7, 70), cv2.FONT_HERSHEY_COMPLEX_SMALL, 3, (100, 255, 0), 3, cv2.LINE_AA)
-        cv2.imshow('Face Recognition', frame)
-        if cv2.waitKey(1)&0xFF == 27:
-            break
+    # Detect faces in the image
+    boxes, _ = mtcnn.detect(frame)
+    if boxes is None:
+        print('No faces detected')
+        cap.release()
+        cv2.destroyAllWindows()
+        exit()
 
+    # Perform face recognition on each detected face
+    for box in boxes:
+        bbox = list(map(int, box.tolist()))
+        face = extract_face(bbox, frame)
+        idx, score = inference(model, face, embeddings)
+        if idx != -1:
+            # print(idx)
+            frame = cv2.rectangle(frame, (bbox[0],bbox[1]), (bbox[2],bbox[3]), (0,0,255), 6)
+            score = torch.Tensor.cpu(score[0]).detach().numpy()*power
+            frame = cv2.putText(frame, names[idx] + '_{:.2f}'.format(score), (bbox[0],bbox[1]), cv2.FONT_HERSHEY_DUPLEX, 2, (0,255,0), 2, cv2.LINE_8)
+        else:
+            frame = cv2.rectangle(frame, (bbox[0],bbox[1]), (bbox[2],bbox[3]), (0,0,255), 6)
+            frame = cv2.putText(frame,'Unknown', (bbox[0],bbox[1]), cv2.FONT_HERSHEY_DUPLEX, 2, (0,255,0), 2, cv2.LINE_8)
+
+    # Display the image with the face detection and recognition results
+    cv2.imshow('Face Recognition', frame)
+    cv2.waitKey(0)
+
+    # Release the video stream and close the window
     cap.release()
     cv2.destroyAllWindows()
-    #+": {:.2f}".format(score)

@@ -7,7 +7,7 @@ import os
 device =  torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print(device)
 
-IMG_PATH = './data/test_images/'
+IMG_PATH = './MTCNN/data/test_images'
 count = 50
 usr_name = input("Input ur name: ")
 USR_PATH = os.path.join(IMG_PATH, usr_name)

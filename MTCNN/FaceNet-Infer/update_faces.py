@@ -6,8 +6,8 @@ import os
 from PIL import Image
 import numpy as np
 
-IMG_PATH = './data/test_images'
-DATA_PATH = './data'
+IMG_PATH = './MTCNN/data/test_images'
+DATA_PATH = './MTCNN/data'
 
 device =  torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print(device)
@@ -43,7 +43,7 @@ for usr in os.listdir(IMG_PATH):
         continue
     embedding = torch.cat(embeds).mean(0, keepdim=True) #dua ra trung binh cua 30 anh, kich thuoc [1,512]
     embeddings.append(embedding) # 1 cai list n cai [1,512]
-    print(embedding)
+    # print(embedding)
     names.append(usr)
     
 embeddings = torch.cat(embeddings) #[n,512]
